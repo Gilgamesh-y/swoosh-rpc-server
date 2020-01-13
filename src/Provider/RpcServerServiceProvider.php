@@ -4,6 +4,7 @@ namespace Src\RPCServer\Provider;
 
 use Swoole\Server;
 use Src\Core\AbstractProvider;
+use Src\RPCServer\RPCSubManager;
 use Src\ServerEvent\RpcServerEvent;
 
 class RpcServerServiceProvider extends AbstractProvider
@@ -32,6 +33,10 @@ class RpcServerServiceProvider extends AbstractProvider
             }
 
             return $server;
+        });
+
+        $this->app->set('rpc_stub', function () {
+            return new RPCSubManager;
         });
     }
 }

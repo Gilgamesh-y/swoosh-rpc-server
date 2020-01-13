@@ -5,7 +5,7 @@ namespace Src\RPCServer;
 use Src\App;
 use Src\RPCServer\Connections\ConsulConnection;
 
-class RPCServerManager
+class RPCSubManager
 {
     /**
      * Service discovery driver
