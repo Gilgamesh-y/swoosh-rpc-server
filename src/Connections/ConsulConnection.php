@@ -24,17 +24,17 @@ class ConsulConnection extends Connection
     /**
      * @var string The address of this register server
      */
-    protected $remote_host = '127.0.0.1';
+    protected $server_stub_host = '127.0.0.1';
 
     /**
      * @var int The port of this register server
      */
-    protected $remote_port = 8500;
+    protected $server_stub_port = 8502;
 
     /**
      * @var string Health check url
      */
-    protected $health_check_url = 'http://127.0.0.1';
+    protected $health_check_url = 'http://127.0.0.1/health_check';
 
     /**
      * @var string Health check interval
@@ -50,8 +50,7 @@ class ConsulConnection extends Connection
         $this->tags = $consul_config['tags'];
         $this->host = $rpc_server_config['host'];
         $this->port = (int)$rpc_server_config['port'];
-        $this->remote_host = $consul_config['remote_host'];
-        $this->remote_port = $consul_config['remote_port'];
+        $this->server_stub_host = $consul_config['server_stub_host'];
         $this->health_check_url = $consul_config['health_check_url'];
         $this->health_check_interval = $consul_config['health_check_interval'];
     }
@@ -69,7 +68,7 @@ class ConsulConnection extends Connection
             'Address' => $this->host,
             'Port' => $this->port,
             'Check' => [
-                'HTTP' => $this->host . ':' . $this->port . $this->health_check_url,
+                'HTTP' => $this->health_check_url,
                 'Interval' => $this->health_check_interval
             ]
         ];
@@ -77,7 +76,7 @@ class ConsulConnection extends Connection
 
     /**
      * Register service
-     * @return string
+     * @return bool
      */
     public function register()
     {
@@ -85,12 +84,45 @@ class ConsulConnection extends Connection
     }
 
     /**
-     * deregister service
-     * @return string
+     * Deregister service
+     * @return bool
      */
     public function destruct()
     {
         return $this->put('/v1/agent/service/deregister/'.$this->service_id);
+    }
+
+    /**
+     * Get catalog of the service
+     *
+     * @param int|string $service_name
+     * @param bool $must_health
+     * @return string
+     */
+    public function services($service_name, $must_health = false): string
+    {
+        if ($must_health) {
+            return $this->get('/v1/catalog/service/'.$service_name.'?passing');
+        }
+
+        return $this->get('/v1/catalog/service/'.$service_name);
+    }
+
+    /**
+     * @param string $uri
+     * @return bool
+     */
+    public function getCh($uri)
+    {
+        $ch = curl_init();
+        $header[] = 'Content-type:application/json';
+
+        curl_setopt($ch, CURLOPT_URL, $this->server_stub_host.':'.$this->server_stub_port.$uri);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+        return $ch;
     }
 
     /**
@@ -102,21 +134,35 @@ class ConsulConnection extends Connection
     public function put($uri, array $params = [])
     {
         try {
-            $ch = curl_init();
-            $header[] = 'Content-type:application/json';
-    
-            curl_setopt($ch, CURLOPT_URL, $this->remote_host.':'.$this->remote_port.$uri);
+            $ch = $this->getCh($uri);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST,"PUT");
-            curl_setopt($ch, CURLOPT_HEADER, 0);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params, JSON_UNESCAPED_UNICODE));
     
             $res = curl_exec($ch);
             curl_close($ch);
+
             if ($res === '') {
                 return true;
             }
+        } catch(\Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
+     * consul get api
+     * @param string $uri
+     * @return string
+     */
+    public function get($uri): string
+    {
+        try {
+            $ch = $this->getCh($uri);
+    
+            $res = curl_exec($ch);
+            curl_close($ch);
+
+            return $res;
         } catch(\Exception $e) {
             throw $e;
         }

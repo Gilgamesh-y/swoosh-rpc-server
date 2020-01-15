@@ -11,15 +11,18 @@ class RPCSubManager
      * Service discovery driver
      */
     protected $driver;
-
+    
     /**
      * Witch register center will be used
      */
-    public function getConnection()
+    public function createConnection()
     {
         $config = $this->getRpcServerConfig();
         switch ($config['driver']) {
             case 'consul':
+                return new ConsulConnection;
+                break;
+            case 'zookeeper':
                 return new ConsulConnection;
                 break;
         }
@@ -27,10 +30,10 @@ class RPCSubManager
         throw new \Exception('Unsupported driver [' . $config['driver'] . ']');
     }
 
-    public function getDriver()
+    public function getConnection()
     {
         if (!$this->driver) {
-            $this->driver = $this->getConnection();
+            $this->driver = $this->createConnection();
         }
         return $this->driver;
     }
@@ -42,7 +45,7 @@ class RPCSubManager
 
     public function __call($method, $parameters)
     {
-        return $this->getDriver()->$method(...$parameters);
+        return $this->getConnection()->$method(...$parameters);
     }
 
     public static function __callStatic($method, $arguments)

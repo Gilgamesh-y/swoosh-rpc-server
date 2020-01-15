@@ -4,7 +4,7 @@ namespace Src\RPCServer\Connections;
 
 use Src\RPCServer\Contract\ConnectionInterface;
 
-class Connection implements ConnectionInterface
+abstract class Connection implements ConnectionInterface
 {
     /**
      * @var string The host of this service
@@ -15,4 +15,26 @@ class Connection implements ConnectionInterface
      * @var int The port of this service
      */
     protected $port = 9527;
+
+    abstract function services($service_name): string;
+
+    public function getHost(): string
+    {
+        return $this->host;
+    }
+
+    public function getPort(): int
+    {
+        return $this->port;
+    }
+
+    public function getServerStubHost(): string
+    {
+        return $this->server_stub_host;
+    }
+
+    public function getServerStubPort(): int
+    {
+        return $this->server_stub_port;
+    }
 }

@@ -23,6 +23,10 @@ class RpcServerServiceProvider extends AbstractProvider
 
     public function register()
     {
+        $this->app->set('rpc_stub', function () {
+            return (new RPCSubManager)->getConnection();
+        });
+
         $this->app->set('rpc_server', function () {
             $config = $this->app->get('config')->get('app.rpc_server');
             $server = new Server($config['host'], $config['port']);
@@ -31,12 +35,10 @@ class RpcServerServiceProvider extends AbstractProvider
             foreach ($this->onList as $function => $event){
                 $server->on($event, [$http, $function]);
             }
-
+            
+            $this->app->get('rpc_stub')->register();
+            
             return $server;
-        });
-
-        $this->app->set('rpc_stub', function () {
-            return new RPCSubManager;
         });
     }
 }
