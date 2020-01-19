@@ -8,5 +8,7 @@ interface ConnectionInterface
 
     public function getPort(): int;
 
-    public function services($service_name): string;
+    public function services($service_name): array;
+
+    public function register();
 }

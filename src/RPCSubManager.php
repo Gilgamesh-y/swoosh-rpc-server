@@ -4,6 +4,7 @@ namespace Src\RPCServer;
 
 use Src\App;
 use Src\RPCServer\Connections\ConsulConnection;
+use Src\RPCServer\Connections\ZookeeperConnection;
 
 class RPCSubManager
 {
@@ -23,7 +24,7 @@ class RPCSubManager
                 return new ConsulConnection;
                 break;
             case 'zookeeper':
-                return new ConsulConnection;
+                return new ZookeeperConnection;
                 break;
         }
 

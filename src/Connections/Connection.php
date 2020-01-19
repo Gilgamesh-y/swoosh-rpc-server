@@ -16,7 +16,7 @@ abstract class Connection implements ConnectionInterface
      */
     protected $port = 9527;
 
-    abstract function services($service_name): string;
+    abstract function services($service_name): array;
 
     public function getHost(): string
     {

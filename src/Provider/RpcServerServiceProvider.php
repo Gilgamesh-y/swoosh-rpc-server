@@ -36,7 +36,9 @@ class RpcServerServiceProvider extends AbstractProvider
                 $server->on($event, [$http, $function]);
             }
             
-            $this->app->get('rpc_stub')->register();
+            if ($config['need_registered']) {
+                $this->app->get('rpc_stub')->register();
+            }
             
             return $server;
         });

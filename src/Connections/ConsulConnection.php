@@ -97,15 +97,15 @@ class ConsulConnection extends Connection
      *
      * @param int|string $service_name
      * @param bool $must_health
-     * @return string
+     * @return array
      */
-    public function services($service_name, $must_health = false): string
+    public function services($service_name, $must_health = false): array
     {
         if ($must_health) {
-            return $this->get('/v1/catalog/service/'.$service_name.'?passing');
+            return json_decode($this->get('/v1/catalog/service/'.$service_name.'?passing'), true);
         }
 
-        return $this->get('/v1/catalog/service/'.$service_name);
+        return json_decode($this->get('/v1/catalog/service/'.$service_name), true);
     }
 
     /**
