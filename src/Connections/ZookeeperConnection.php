@@ -65,6 +65,9 @@ class ZookeeperConnection extends Connection
 
     public function __construct()
     {
+        if (!extension_loaded('zookeeper')) {
+            throw new \Exception('zookeeper扩展未安装');
+        }
         $consul_config = App::get('config')->get('app.consul');
         $rpc_server_config = App::get('config')->get('app.rpc_server');
         $this->service_id = $consul_config['id'];
@@ -106,7 +109,7 @@ class ZookeeperConnection extends Connection
      * @param int|string $service_name
      * @return array
      */
-    public function services($service_name): array
+    public function services($service_name = ''): array
     {
         $childs = $this->connection->getChildren('/'.$service_name);
         if (!$service_name) {
@@ -142,7 +145,15 @@ class ZookeeperConnection extends Connection
     public function create(string $path, string $value = null, array $acls = [['perms' => Zookeeper::PERM_ALL, 'scheme' => 'world', 'id' => 'anyone']], int $flags = null)
     {
         if (!$this->exists($path)) {
-            $this->connection->create('/'.$path, $value, $acls, $flags);
+            if (count($path_arr = explode('/', $path)) > 1) {
+                $path = '';
+                foreach ($path_arr as $p) {
+                    $path = $path . '/' . $p;
+                    $this->connection->create($path, $value, $acls, $flags);
+                }
+            } else {
+                $this->connection->create('/'.$path, $value, $acls, $flags);
+            }
         }
     }
 
