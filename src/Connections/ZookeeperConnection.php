@@ -109,6 +109,9 @@ class ZookeeperConnection extends Connection
     public function services($service_name): array
     {
         $childs = $this->connection->getChildren('/'.$service_name);
+        if (!$service_name) {
+            return $childs;
+        }
         foreach ($childs as &$child) {
             $child = $this->get($this->name.'/'.$child);
             $child = json_decode($child, true);
