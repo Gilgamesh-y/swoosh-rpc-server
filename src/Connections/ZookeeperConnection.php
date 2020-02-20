@@ -68,17 +68,17 @@ class ZookeeperConnection extends Connection
         if (!extension_loaded('zookeeper')) {
             throw new \Exception('zookeeper扩展未安装');
         }
-        $consul_config = App::get('config')->get('app.consul');
+        $config = App::get('config')->get('app.register_center');
         $rpc_server_config = App::get('config')->get('app.rpc_server');
-        $this->service_id = $consul_config['id'];
-        $this->name = $consul_config['name'];
-        $this->tags = $consul_config['tags'];
+        $this->service_id = $config['id'];
+        $this->name = $config['name'];
+        $this->tags = $config['tags'];
         $this->host = $rpc_server_config['host'];
         $this->port = (int)$rpc_server_config['port'];
-        $this->server_stub_host = $consul_config['server_stub_host'];
-        $this->server_stub_port = $consul_config['server_stub_port'];
-        $this->health_check_url = $consul_config['health_check_url'];
-        $this->health_check_interval = $consul_config['health_check_interval'];
+        $this->server_stub_host = $config['server_stub_host'];
+        $this->server_stub_port = $config['server_stub_port'];
+        $this->health_check_url = $config['health_check_url'];
+        $this->health_check_interval = $config['health_check_interval'];
     }
 
     /**

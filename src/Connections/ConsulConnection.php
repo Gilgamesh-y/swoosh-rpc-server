@@ -43,7 +43,7 @@ class ConsulConnection extends Connection
 
     public function __construct()
     {
-        $consul_config = App::get('config')->get('app.consul');
+        $consul_config = App::get('config')->get('app.register_center');
         $rpc_server_config = App::get('config')->get('app.rpc_server');
         $this->service_id = $consul_config['id'];
         $this->name = $consul_config['name'];
